@@ -1,47 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Anonychat Games</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Anonychat Games</h1>
-    <input type="text" id="searchBar" placeholder="Search games..."/>
-    <button id="adminBtn">Admin</button>
-  </header>
+  <h1>Anonychat Games</h1>
 
-  <main>
-    <div id="gamesGrid"></div>
-  </main>
+  <input type="text" id="search" placeholder="Search games...">
 
-  <div id="gameOverlay" class="hidden">
-    <button id="backBtn">← Back</button>
-    <iframe id="gameFrame" src=""></iframe>
-  </div>
+  <div id="games" class="grid"></div>
 
-  <div id="adminPanel" class="hidden">
-    <h2>Admin Panel</h2>
-    <input type="password" id="adminCode" placeholder="Enter code"/>
-    <button id="submitCode">Enter</button>
+  <hr>
+  <h2>Admin Panel</h2>
+  <input type="password" id="adminCode" placeholder="Enter admin code">
+  <button onclick="loginAdmin()">Login</button>
 
-    <div id="adminControls" class="hidden">
-      <h3>Add Game</h3>
-      <input type="text" id="gameName" placeholder="Game name"/>
-      <input type="text" id="gameUrl" placeholder="Game embed URL"/>
-      <input type="text" id="gameImage" placeholder="Cover image URL"/>
-      <button id="addGameBtn">Add Game</button>
+  <div id="adminPanel" style="display:none;">
+    <h3>Add Game</h3>
+    <input id="gameName" placeholder="Game Name"><br>
+    <input id="gameCover" placeholder="Cover Image URL"><br>
+    <textarea id="gameHTML" placeholder="Paste game HTML"></textarea><br>
+    <button onclick="addGame()">Add</button>
 
-      <h3>Remove Game</h3>
-      <input type="text" id="removeName" placeholder="Game name"/>
-      <button id="removeGameBtn">Remove</button>
+    <h3>Remove Game</h3>
+    <button onclick="enableRemove()">Enable Remove Mode</button>
 
-      <h3>Reorganize Games</h3>
-      <button id="reorgBtn">Enable Drag</button>
-      <button id="saveReorgBtn">Save</button>
-    </div>
+    <h3>Reorder Games</h3>
+    <button onclick="enableReorder()">Enable Reorder Mode</button>
+    <button onclick="saveReorder()">Save Order</button>
   </div>
 
   <script src="app.js"></script>
