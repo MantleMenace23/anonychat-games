@@ -1,16 +1,12 @@
 {
   "name": "anonychat-games",
   "version": "1.0.0",
-  "description": "AnonyChat Games site with fullscreen play and admin panel",
+  "description": "Game hosting site with admin panel",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
-    "shortid": "^2.2.16"
+    "express": "^4.19.2"
   }
 }

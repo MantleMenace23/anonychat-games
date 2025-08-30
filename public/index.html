@@ -1,47 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AnonyChat Games</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anonychat Games</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
-    <h1>AnonyChat Games</h1>
-    <div id="admin-area">
-      <input id="admin-code" placeholder="Admin code" type="password">
-      <button id="admin-login">Unlock Admin</button>
-      <span id="admin-status"></span>
-    </div>
+    <h1>Anonychat Games</h1>
+    <input type="text" id="searchBar" placeholder="Search games..."/>
+    <button id="adminBtn">Admin</button>
   </header>
 
   <main>
-    <input id="search" type="text" placeholder="Search games...">
-    <section id="games-grid" class="grid"></section>
+    <div id="gamesGrid"></div>
   </main>
 
-  <!-- Fullscreen play -->
-  <div id="play-page" class="hidden">
-    <button id="back-button">⬅ Back</button>
-    <h2 id="play-title"></h2>
-    <iframe id="play-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+  <div id="gameOverlay" class="hidden">
+    <button id="backBtn">← Back</button>
+    <iframe id="gameFrame" src=""></iframe>
   </div>
 
-  <!-- Admin panel -->
-  <div id="admin-panel" class="modal hidden">
-    <div class="panel">
-      <h2>Admin Panel</h2>
-      <form id="add-form">
-        <input name="name" placeholder="Game Name" required>
-        <input type="file" name="cover" accept="image/*">
-        <textarea name="html" rows="6" placeholder="Paste game HTML" required></textarea>
-        <button type="submit">Add Game</button>
-        <button type="button" id="close-admin">Close</button>
-      </form>
-      <h3>Reorder / Remove</h3>
-      <div id="reorder-area" class="reorder-area"></div>
-      <button id="save-order">Save Order</button>
+  <div id="adminPanel" class="hidden">
+    <h2>Admin Panel</h2>
+    <input type="password" id="adminCode" placeholder="Enter code"/>
+    <button id="submitCode">Enter</button>
+
+    <div id="adminControls" class="hidden">
+      <h3>Add Game</h3>
+      <input type="text" id="gameName" placeholder="Game name"/>
+      <input type="text" id="gameUrl" placeholder="Game embed URL"/>
+      <input type="text" id="gameImage" placeholder="Cover image URL"/>
+      <button id="addGameBtn">Add Game</button>
+
+      <h3>Remove Game</h3>
+      <input type="text" id="removeName" placeholder="Game name"/>
+      <button id="removeGameBtn">Remove</button>
+
+      <h3>Reorganize Games</h3>
+      <button id="reorgBtn">Enable Drag</button>
+      <button id="saveReorgBtn">Save</button>
     </div>
   </div>
 

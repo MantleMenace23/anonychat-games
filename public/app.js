@@ -1,115 +1,118 @@
-const API = {
-  getGames: '/api/games',
-  login: '/api/admin/login',
-  add: '/api/admin/add',
-  remove: '/api/admin/remove',
-  reorder: '/api/admin/reorder'
-};
+let games = JSON.parse(localStorage.getItem("games")) || [
+  { name: "Sample Game", url: "https://example.com", image: "https://via.placeholder.com/200" }
+];
 
-let ADMIN_TOKEN = null;
-let allGames = [];
+const searchBar = document.getElementById("searchBar");
+const gamesGrid = document.getElementById("gamesGrid");
+const gameOverlay = document.getElementById("gameOverlay");
+const gameFrame = document.getElementById("gameFrame");
+const backBtn = document.getElementById("backBtn");
 
-async function fetchGames(){ return (await fetch(API.getGames)).json(); }
+const adminBtn = document.getElementById("adminBtn");
+const adminPanel = document.getElementById("adminPanel");
+const adminCodeInput = document.getElementById("adminCode");
+const submitCode = document.getElementById("submitCode");
+const adminControls = document.getElementById("adminControls");
 
-function el(tag, attrs={}, ...children){
-  const e = document.createElement(tag);
-  for (const k in attrs) {
-    if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
-    else if (k === 'class') e.className = attrs[k];
-    else e.setAttribute(k, attrs[k]);
-  }
-  children.flat().forEach(c => typeof c === 'string' ? e.appendChild(document.createTextNode(c)) : e.appendChild(c));
-  return e;
+const gameNameInput = document.getElementById("gameName");
+const gameUrlInput = document.getElementById("gameUrl");
+const gameImageInput = document.getElementById("gameImage");
+const addGameBtn = document.getElementById("addGameBtn");
+
+const removeNameInput = document.getElementById("removeName");
+const removeGameBtn = document.getElementById("removeGameBtn");
+
+const reorgBtn = document.getElementById("reorgBtn");
+const saveReorgBtn = document.getElementById("saveReorgBtn");
+
+let adminUnlocked = false;
+let dragMode = false;
+
+// Render game tiles
+function renderGames(filter = "") {
+  gamesGrid.innerHTML = "";
+  games
+    .filter(g => g.name.toLowerCase().includes(filter.toLowerCase()))
+    .forEach((g, index) => {
+      const tile = document.createElement("div");
+      tile.className = "gameTile";
+      tile.innerHTML = `<img src="${g.image}" alt="${g.name}"><p>${g.name}</p>`;
+      tile.onclick = () => {
+        gameFrame.src = g.url;
+        gameOverlay.classList.remove("hidden");
+      };
+
+      if (dragMode) {
+        tile.draggable = true;
+        tile.ondragstart = e => {
+          e.dataTransfer.setData("index", index);
+        };
+        tile.ondragover = e => e.preventDefault();
+        tile.ondrop = e => {
+          const from = e.dataTransfer.getData("index");
+          const to = index;
+          [games[from], games[to]] = [games[to], games[from]];
+          renderGames(searchBar.value);
+        };
+      }
+
+      gamesGrid.appendChild(tile);
+    });
 }
 
-function displayGames(games){
-  const grid = document.getElementById('games-grid');
-  grid.innerHTML = '';
-  games.forEach(g => {
-    const card = el('div',{class:'card'},
-      g.cover ? el('img',{src:g.cover}) : el('div',{style:'height:120px;background:#333;border-radius:8px;'}),
-      el('h4',{},g.name),
-      el('button',{onclick:()=>openGameFullscreen(g)},'Play')
-    );
-    grid.appendChild(card);
-  });
-}
-
-async function renderGrid(){ allGames = await fetchGames(); displayGames(allGames); }
-
-// Fullscreen game
-function openGameFullscreen(g){
-  document.getElementById('play-page').classList.remove('hidden');
-  document.getElementById('play-title').innerText = g.name;
-  document.getElementById('play-iframe').srcdoc = g.html;
-}
-document.getElementById('back-button').onclick = ()=>{
-  document.getElementById('play-page').classList.add('hidden');
-  document.getElementById('play-iframe').srcdoc='';
+// Back button
+backBtn.onclick = () => {
+  gameOverlay.classList.add("hidden");
+  gameFrame.src = "";
 };
 
 // Search
-document.getElementById('search').oninput = (e)=>{
-  const term = e.target.value.toLowerCase();
-  displayGames(allGames.filter(g=>g.name.toLowerCase().includes(term)));
+searchBar.oninput = e => renderGames(e.target.value);
+
+// Admin open
+adminBtn.onclick = () => {
+  adminPanel.classList.toggle("hidden");
 };
 
-// Admin login
-document.getElementById('admin-login').onclick = async ()=>{
-  const code=document.getElementById('admin-code').value;
-  const res=await fetch(API.login,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-  const j=await res.json();
-  if(j.ok){ ADMIN_TOKEN=j.token; document.getElementById('admin-status').textContent='Unlocked'; openAdminPanel(); }
-  else alert('Bad code');
+// Code submit
+submitCode.onclick = () => {
+  if (adminCodeInput.value === "letmein") {
+    adminUnlocked = true;
+    adminControls.classList.remove("hidden");
+  } else {
+    alert("Wrong code!");
+  }
 };
-
-function openAdminPanel(){ document.getElementById('admin-panel').classList.remove('hidden'); refreshAdmin(); }
-document.getElementById('close-admin').onclick=()=>document.getElementById('admin-panel').classList.add('hidden');
 
 // Add game
-document.getElementById('add-form').onsubmit=async ev=>{
-  ev.preventDefault();
-  const fd=new FormData(ev.target);
-  const res=await fetch(API.add,{method:'POST',headers:{'x-admin-token':ADMIN_TOKEN},body:fd});
-  const j=await res.json();
-  if(j.ok){ alert('Added'); ev.target.reset(); refreshAdmin(); renderGrid(); }
-  else alert('Error');
+addGameBtn.onclick = () => {
+  games.push({
+    name: gameNameInput.value,
+    url: gameUrlInput.value,
+    image: gameImageInput.value
+  });
+  localStorage.setItem("games", JSON.stringify(games));
+  renderGames();
 };
 
-// Remove / reorder
-async function refreshAdmin(){
-  const area=document.getElementById('reorder-area');
-  area.innerHTML='';
-  const games=await fetchGames();
-  games.forEach(g=>{
-    const card=el('div',{class:'reorder-card',draggable:true,'data-id':g.id},
-      el('div',{},g.name),
-      el('button',{onclick:()=>removeGame(g.id)},'Remove')
-    );
-    card.dataset.name=g.name; card.dataset.html=g.html; card.dataset.cover=g.cover||'';
-    area.appendChild(card);
-  });
-  enableDnD(area);
-}
-async function removeGame(id){
-  await fetch(API.remove,{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:JSON.stringify({id})});
-  refreshAdmin(); renderGrid();
-}
-document.getElementById('save-order').onclick=async ()=>{
-  const cards=[...document.querySelectorAll('.reorder-card')];
-  const newGames=cards.map(c=>({id:c.dataset.id,name:c.dataset.name,html:c.dataset.html,cover:c.dataset.cover}));
-  await fetch(API.reorder,{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:JSON.stringify({games:newGames})});
-  refreshAdmin(); renderGrid();
+// Remove game
+removeGameBtn.onclick = () => {
+  games = games.filter(g => g.name !== removeNameInput.value);
+  localStorage.setItem("games", JSON.stringify(games));
+  renderGames();
 };
 
-// Drag & drop reorder
-function enableDnD(container){
-  let dragged=null;
-  container.querySelectorAll('.reorder-card').forEach(c=>{
-    c.ondragstart=()=>{dragged=c;};
-    c.ondragover=e=>e.preventDefault();
-    c.ondrop=e=>{e.preventDefault(); if(dragged&&dragged!==c){container.insertBefore(dragged,c.nextSibling);} };
-  });
-}
+// Reorganize
+reorgBtn.onclick = () => {
+  dragMode = true;
+  renderGames(searchBar.value);
+};
 
-window.onload=renderGrid;
+saveReorgBtn.onclick = () => {
+  dragMode = false;
+  localStorage.setItem("games", JSON.stringify(games));
+  renderGames(searchBar.value);
+};
+
+// Init
+renderGames();
